@@ -13,9 +13,10 @@ public class BitArray implements Clusterable<BitArray>{
 
 	public BitArray(String str){
 		// TODO: Complete
-		this.bits = str.chars()
-				.mapToObj(c -> c==1)
+		String[] splitedStr = str.split(" ");
+		this.bits = Stream.of(splitedStr).map(b -> Objects.equals(b, "true")                )
 				.collect(Collectors.toCollection(ArrayList::new));
+
 	}
 	public BitArray(boolean[] bits) {
 		// TODO: Complete
@@ -28,16 +29,22 @@ public class BitArray implements Clusterable<BitArray>{
 	public double distance(BitArray other) {
 		// TODO: Complete
 		if (this.bits.size() != other.bits.size()) {return Double.POSITIVE_INFINITY;}
-		int dist = (int) IntStream.range(0, this.bits.size())
-				.filter(i -> !this.bits.get(i).equals(other.bits.get(i))).count();
+		double dist = (double) IntStream.range(0, this.bits.size())
+				.filter(i -> !(this.bits.get(i).equals(other.bits.get(i)))).count();
 		return dist;
 	}
 
 	public static Set<BitArray> readClusterableSet(String path) throws IOException {
 		// TODO: Complete. If the file contains bitarrays of different lengths,
 		//  retain only those of maximal length
-		Stream<String> bitLines = Files.lines(Paths.get(path));
-		Set<BitArray> bitArrays = bitLines
+		int max_length = Files.lines(Paths.get(path))
+				.map(l -> l.split(","))
+				.map(l -> l.length)
+				.max(Integer::compareTo).orElse(0);
+		Set<BitArray> bitArrays = Files.lines(Paths.get(path))
+				.map(l -> l.split(","))
+				.filter(l -> l.length == max_length)
+				.map(l -> String.join(" ",l))
 				.map(BitArray::new)
 				.collect(Collectors.toSet());
 		return bitArrays;
